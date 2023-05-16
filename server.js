@@ -1,10 +1,18 @@
 // server.js
 
+// Import required dependencies
 const express = require('express');
-const serverless = require('serverless-http');
+const http = require('http');
+const socketIO = require('socket.io');
+
+// Create Express app
 const app = express();
-const http = require('http').createServer(app);
-const io = require('socket.io')(http);
+
+// Create HTTP server using the Express app
+const server = http.createServer(app);
+
+// Create Socket.IO instance by passing the HTTP server
+const io = socketIO(server);
 
 app.use(express.static(__dirname + '/public'));
 
@@ -12,28 +20,31 @@ app.get('/', (req, res) => {
   res.sendFile(__dirname + '/index.html');
 });
 
-// Socket.IO event handling
+// Handle socket connection event
 io.on('connection', (socket) => {
   console.log('A user connected');
 
-  // Handling chat messages
+  // Handle custom events
   socket.on('chat message', (message) => {
-    console.log('Message:', message);
-    io.emit('chat message', message); // Broadcast the message to all connected clients
+    console.log('Received message:', message);
+    
+    // Broadcast the message to all connected clients
+    io.emit('chat message', message);
   });
 
-  // Handling disconnection
+  // Handle disconnect event
   socket.on('disconnect', () => {
     console.log('A user disconnected');
   });
 });
 
-module.exports = app;
-module.exports.handler = serverless(app)
-
+// Define routes for your API
+app.get('/', (req, res) => {
+  res.send('Hello, world!');
+});
 
 // Start the server
-const port = 3000;
-http.listen(port, () => {
-  console.log(`Server running on http://localhost:${port}`);
+const port = process.env.PORT || 3000;
+server.listen(port, () => {
+  console.log(`Server running on port ${port}`);
 });
