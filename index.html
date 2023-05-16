@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat Open</title>
+</head>
+
+<body>
+    <div id="messages" style="width: 100%; height: 500px; border: 1px solid black;">
+        <span id="span"></span><br>
+    </div>
+    <form id="chat-form">
+        <input id="input-message" autocomplete="off" /><button>Send</button>
+    </form>
+
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.4.1/socket.io.js"></script>
+    <script type="text/javascript">
+        // Client-side JavaScript
+        const socket = io();
+        // Handling chat message submission
+        document.getElementById('chat-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const messageInput = document.getElementById('input-message');
+            const message = messageInput.value.trim();
+            if (message !== '') {
+                socket.emit('chat message', message); // Send the message to the server
+                messageInput.value = '';
+            }
+        });
+
+        // Handling received chat messages
+        socket.on('chat message', (message) => {
+            const msg = document.createElement('div');
+            msg.innerHTML = `<span> ${message} </span> <br>`;
+            document.getElementById('messages').appendChild(msg);
+        });
+
+
+    </script>
+</body>
+
+</html>
